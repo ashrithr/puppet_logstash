@@ -6,11 +6,16 @@ class logstash::config($role, $indexer) {
   }
 
   # Manage the single config dir
+  file { "${logstash::configdir}":
+    ensure => directory,
+  }
+
   file { "${logstash::configdir}/conf.d":
     ensure  => directory,
     mode    => '0640',
     purge   => true,
     recurse => true,
+    require => File["${logstash::configdir}"],
     notify  => Service['logstash']
   }
 

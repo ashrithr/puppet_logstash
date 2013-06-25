@@ -5,12 +5,12 @@ class logstash::kibana {
   $kibana_group = 'kibana'
   $kibana_etc = '/etc/kibana'
   $kibana_log = '/var/log/kibana'
-  $kibana_run = '/var/run/kibana'
+  $kibana_run = '/var/run/sinatra'
   $elasticsearch_servers = ['localhost:9200']
   $elasticsearch_timeout = '500'
   $kibana_port = '5601'
   $kibana_address = 'locahost'
-  $dep_packages = ['ruby', 'ruby-devel', 'rubygems', 'git']
+  $dep_packages = ['ruby', 'ruby-devel', 'rubygems', 'git', 'make', 'gcc-c++']
 
   package { $dep_packages:
     ensure => installed,
@@ -27,11 +27,6 @@ class logstash::kibana {
       ensure => 'directory';
     $kibana_log:
       ensure => 'directory';
-  }
-
-  file { $kibana_home:
-    ensure => directory,
-    before => Exec["install_kibana"]
   }
 
   file { [$kibana_run, "$kibana_run/pid"]:
@@ -51,12 +46,14 @@ class logstash::kibana {
     command => 'bundle install',
     cwd     => "$kibana_home",
     path    => ["/usr/local/sbin","/usr/local/bin","/usr/sbin","/usr/bin","/sbin","/bin"],
-    require => [ Package['bundler'], Exec['install_kibana'] ]
+    require => [ Package['bundler'], Exec['install_kibana'] ],
+    before => Service['kibana']
   }
 
   file { "${kibana_home}/KibanaConfig.rb":
     ensure => present,
     content => template("${module_name}/etc/kibana/KibanaConfig.rb.erb"),
+    require => Exec['install_kibana'],
     notify => Service['kibana']
   }
 

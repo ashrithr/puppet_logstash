@@ -17,7 +17,8 @@ class logstash($role, $indexer = undef) inherits logstash::params {
       indexer => $indexer
     } ~>
     class { 'logstash::service': }
-  } else {
+  }
+  else {
     notice('installing role logstash shipper (agent)')
     #shipper requires a indexer(hostname|ip) to send events to
     if $indexer == undef {
