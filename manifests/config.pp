@@ -45,17 +45,17 @@ class logstash::config($role, $indexer) {
   {
     case $::operatingsystem {
       'RedHat', 'CentOS': {
-        $logs_path = ["/var/log/secure", "/var/log/messages"]
+        $logs_path = "['/var/log/secure', '/var/log/messages']"
       }
       'Debian', 'Ubuntu': {
-        $logs_path = ["/var/log/dmesg", "/var/log/syslog"]
+        $logs_path = "['/var/log/dmesg', '/var/log/syslog']"
       }
       default: {
         fail("\"${module_name}\" provides no default init file
               for \"${::operatingsystem}\"")
       }
     }
-    file { "${logstash::configdir}/conf.d/indexer.conf":
+    file { "${logstash::configdir}/conf.d/shipper.conf":
       ensure => present,
       content => template("${module_name}/etc/shipper.conf.erb"),
       require => File["${logstash::configdir}/conf.d"]

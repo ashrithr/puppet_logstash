@@ -22,6 +22,8 @@ Using with puppet apply (given module lives in /root/modules):
 ```
 $cd ~ && mkdir modules
 $cd ~/modules && git clone https://github.com/ashrithr/puppet_logstash.git logstash
+#dependecy java module
+$cd ~/modules && git clone https://github.com/ashrithr/puppet_java.git java
 ```
 
 Install Logstash Indexer:
