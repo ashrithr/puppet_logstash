@@ -40,14 +40,15 @@ class logstash::kibana {
   }
 
   exec { "install_kibana":
-    command => "git clone git://github.com/rashidkpc/Kibana.git kibana"
+    command => 'git clone git://github.com/rashidkpc/Kibana.git kibana',
     cwd => '/opt',
+    path => ["/usr/local/sbin","/usr/local/bin","/usr/sbin","/usr/bin","/sbin","/bin"],
     creates => $kibana_home,
     require => Package[$dep_packages]
   }
 
   exec { "bundle_install":
-    command => "bundle install"
+    command => 'bundle install',
     cwd     => "$kibana_home",
     path    => ["/usr/local/sbin","/usr/local/bin","/usr/sbin","/usr/bin","/sbin","/bin"],
     require => [ Package['bundler'], Exec['install_kibana'] ]
@@ -55,14 +56,14 @@ class logstash::kibana {
 
   file { "${kibana_home}/KibanaConfig.rb":
     ensure => present,
-    content => template('etc/kibana/KibanaConfig.rb.erb'),
+    content => template("${module_name}/etc/kibana/KibanaConfig.rb.erb"),
     notify => Service['kibana']
   }
 
   #Service
 
   file { "${kibana_home}/kibana-daemon.rb":
-    alaias => 'kibana_daemon',
+    alias => 'kibana_daemon',
     ensure => present,
     mode => '0755',
     source => "puppet:///modules/${module_name}/kibana-daemon.rb",
@@ -71,7 +72,7 @@ class logstash::kibana {
   }
 
   file { '/etc/init.d/kibana':
-    alaias => 'kibana_init',
+    alias => 'kibana_init',
     ensure => present,
     mode => '0755',
     content => template("${module_name}/etc/kibana/kibanainit.rb.erb"),

@@ -1,4 +1,6 @@
 class logstash::params {
+  include java::params
+
   $ensure = 'present'
 
   $configdir = '/etc/logstash'

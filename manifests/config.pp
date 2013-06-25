@@ -1,4 +1,4 @@
-class logstash::config {
+class logstash::config($role, $indexer) {
   # File defaults
   File {
     owner => $logstash::params::logstash_user,
@@ -30,4 +30,30 @@ class logstash::config {
     require => Exec[ 'create_tmp_dir' ]
   }
 
+  if $role == 'indexer' {
+    file { "${logstash::configdir}/conf.d/indexer.conf":
+      ensure => present,
+      content => template("${module_name}/etc/indexer.conf.erb"),
+      require => File["${logstash::configdir}/conf.d"]
+    }
+  } else
+  {
+    case $::operatingsystem {
+      'RedHat', 'CentOS': {
+        $logs_path = ["/var/log/secure", "/var/log/messages"]
+      }
+      'Debian', 'Ubuntu': {
+        $logs_path = ["/var/log/dmesg", "/var/log/syslog"]
+      }
+      default: {
+        fail("\"${module_name}\" provides no default init file
+              for \"${::operatingsystem}\"")
+      }
+    }
+    file { "${logstash::configdir}/conf.d/indexer.conf":
+      ensure => present,
+      content => template("${module_name}/etc/shipper.conf.erb"),
+      require => File["${logstash::configdir}/conf.d"]
+    }
+  }
 }

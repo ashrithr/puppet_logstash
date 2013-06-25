@@ -10,8 +10,8 @@ class logstash::elasticsearch {
   $sharedirv = "/usr/share/elasticsearch-${version}"
   $sharedir = '/usr/share/elasticsearch'
   $etcdir = '/etc/elasticsearch'
-  $configfile = '$etcdir/elasticsearch.yml'
-  $logconfigfile = '$etcdir/logging.yml'
+  $configfile = "$etcdir/elasticsearch.yml"
+  $logconfigfile = "$etcdir/logging.yml"
 
   case $::operatingsystem {
     'RedHat', 'CentOS': {
@@ -73,7 +73,7 @@ class logstash::elasticsearch {
     mode => '0644'
   }
 
-  exec { $tmpdir:
+  exec { 'extract_es':
     command => "/bin/tar xzf ${tmptarchive} -C /usr/share/",
     cwd => '/tmp',
     creates => $sharedirv,
@@ -85,7 +85,7 @@ class logstash::elasticsearch {
     target  => $sharedirv,
     owner => 'elasticsearch',
     group => 'elasticsearch',
-    require => Exec[$sharedirv],
+    require => Exec['extract_es'],
   }
 
   file { "$sharedir/elasticsearch.in.sh":
@@ -97,7 +97,7 @@ class logstash::elasticsearch {
   file { '/usr/bin/elasticsearch':
     ensure => link,
     target => "$sharedirv/bin/elasticsearch",
-    require => Exec[$sharedirv],
+    require => Exec['extract_es'],
   }
 
   file { $etcdir:

@@ -23,6 +23,7 @@ class logstash::service {
       fail("\"${module_name}\" provides no default init file
             for \"${::operatingsystem}\"")
     }
+  }
 
   # Place built in init file
   file { '/etc/init.d/logstash':
