@@ -2,16 +2,12 @@ class logstash::params {
   include java::params
 
   $ensure = 'present'
-
   $configdir = '/etc/logstash'
-
   $logdir = '/var/log/logstash/'
-
   $logstash_user  = 'root'
   $logstash_group = 'root'
-
+  $logstash_lumberjack_port = 5672
   $jarfile = 'puppet:///modules/logstash/logstash-1.1.13-flatjar.jar'
-
   $java_home = inline_template("<%= scope.lookupvar('java::params::java_base') %>/jdk<%= scope.lookupvar('java::params::java_version') %>")
   $java_bin = "$java_home/bin/java"
 

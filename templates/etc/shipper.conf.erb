@@ -8,9 +8,9 @@ input {
   }
 }
 output {
-  stdout {
-    debug => true
-  }
+  #stdout {
+  #  debug => true
+  #}
   redis {
     host => "<%= @indexer %>"
     data_type => "list"

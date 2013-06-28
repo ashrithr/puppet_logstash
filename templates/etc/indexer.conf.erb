@@ -6,11 +6,30 @@ input {
     data_type => "list"
     key => "logstash"
   }
-}
-output {
-  stdout {
-    debug => true
+
+  lumberjack {
+    port => 5672
+    ssl_certificate => "/etc/ssl/logstash.pub"
+    ssl_key => "/etc/ssl/logstash.key"
+    #key name to identify events coming from lumberjack, used in filtering events
+    type => "syslog"
   }
+}
+
+filter {
+  #Lumberjack sends custom fields. Use those for multi-user kibana access control, tagging
+  mutate {
+    add_tag => [ "%{customer}" ]
+  }
+  mutate {
+    remove => [ "customer" ]
+  }
+}
+
+output {
+  #stdout {
+  #  debug => true
+  #}
   elasticsearch {
     cluster => "logstash"
   }
