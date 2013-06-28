@@ -41,6 +41,17 @@ class logstash::config($role, $indexer) {
       content => template("${module_name}/etc/indexer.conf.erb"),
       require => File["${logstash::configdir}/conf.d"]
     }
+
+    #ssl files used for lumberjack communication
+    file { '/etc/ssl/logstash.pub':
+      ensure => file,
+      source => "puppet:///modules/${module_name}/lumberjack/logstash.pub",
+    }
+
+    file { '/etc/ssl/logstash.key':
+      ensure => file,
+      source => "puppet:///modules/${module_name}/lumberjack/logstash.key"
+    }
   } else
   {
     case $::operatingsystem {

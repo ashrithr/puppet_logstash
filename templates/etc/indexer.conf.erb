@@ -12,7 +12,7 @@ input {
     ssl_certificate => "/etc/ssl/logstash.pub"
     ssl_key => "/etc/ssl/logstash.key"
     #key name to identify events coming from lumberjack, used in filtering events
-    type => "syslog"
+    type => "lumberjack"
   }
 }
 
@@ -23,6 +23,22 @@ filter {
   }
   mutate {
     remove => [ "customer" ]
+  }
+  grep {
+    type => "lumberjack"
+    match => [ "@message", "(.+)" ]
+    drop => true
+    add_tag => [ "grepped" ]
+  }
+  multiline {
+    type => "lumberjack"
+    pattern => "(^\d+\serror)|(^.+Exception: .+)|(^\s+at .+)|(^\s+... \d+ more)|(^\s*Caused by:.+)"
+    what => "previous"
+  }
+  grep {
+    type => "lumberjack"
+    tags => [ "multiline" ]
+    add_field => [ "stacktrace", "true" ]
   }
 }
 

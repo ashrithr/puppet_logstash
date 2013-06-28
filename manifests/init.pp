@@ -42,12 +42,10 @@
 
 class logstash(
   $role,
-  $indexer = undef,
-  $lj_logs = undef,
-  $lj_fields = undef
+  $indexer = undef
   ) inherits logstash::params {
 
-  if ! ($role in [ 'indexer', 'shipper', 'lumberjack' ]) {
+  if ! ($role in [ 'indexer', 'shipper' ]) {
     fail("\"${role}\" is not a valid ensure parameter value")
   }
 
@@ -80,30 +78,4 @@ class logstash(
     } ~>
     class { 'logstash::service': }
   }
-  else {
-    notice('installing role lumberjack (agent)')
-    #lumberjack agent requires
-    # - a indexer(hostname|ip) to send events to
-    # - a list of log files to monitor
-    # - field_name used for tag
-    # - port on which logstash is listening for lumberjack input
-    if $indexer == undef {
-      fail("\"${role}\" requires hostname|ip of indexer")
-    }
-    if $lj_logs == undef {
-      fail("\"${role}\" requires array of log files to send to logstash indexer")
-    }
-    if $lj_fields == undef {
-      $lumberjack_tag_fields = 'lumberjack_host'
-    } else {
-      $lumberjack_tag_fields = $lj_fields
-    }
-    class { 'logstash::lumberjack':
-      $logstash_host => $indexer,
-      $logstash_port => $logstash::params::logstash_lumberjack_port,
-      $logfiles => $lj_logs,
-      $field => $lumberjack_tag_fields
-    }
-  }
-
 }

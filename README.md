@@ -20,10 +20,10 @@ class { 'logstash':
 Using with puppet apply (given module lives in /root/modules):
 
 ```
-$cd ~ && mkdir modules
-$cd ~/modules && git clone https://github.com/ashrithr/puppet_logstash.git logstash
+cd ~ && mkdir modules
+cd ~/modules && git clone https://github.com/ashrithr/puppet_logstash.git logstash
 #dependecy java module
-$cd ~/modules && git clone https://github.com/ashrithr/puppet_java.git java
+cd ~/modules && git clone https://github.com/ashrithr/puppet_java.git java
 ```
 
 Install Logstash Indexer:
@@ -36,6 +36,12 @@ Install Logstash Shipper:
 
 ```
 puppet apply --modulepath=/root/modules/ -e "class {'logstash': role => 'shipper', indexer => 'localhost'}"
+```
+
+Install Lumberjack Agent:
+
+```
+puppet apply --modulepath=/root/modules -e "class {'logstash::lumberjack': logstash_host => 'localhost', logfiles => ['/var/log/messages', '/var/log/secure'], field => 'cw_host_1'}"
 ```
 
 Note: For puppet apply, modules should be located inside modules dir with name as include name:

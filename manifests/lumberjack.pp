@@ -1,9 +1,31 @@
+# BUG: Currently lumberjack only works with existing log files
+# https://github.com/jordansissel/lumberjack/issues/49
+# https://github.com/jordansissel/lumberjack/issues/41
 class logstash::lumberjack(
   $logstash_host,
-  $logstash_port,
-  $field,
+  $logstash_port = 5672,
+  $field = 'lumberjack_host1',
   $logfiles = undef
   ) {
+
+  notice('installing role lumberjack (agent)')
+  #lumberjack agent requires
+  # - a indexer(hostname|ip) to send events to
+  # - a list of log files to monitor
+  # - field_name used for tag
+  # - port on which logstash is listening for lumberjack input
+  if $logstash_host == undef {
+    fail("\"${role}\" requires hostname|ip of indexer")
+  }
+  if $logfiles == undef {
+    fail("\"${role}\" requires array of log files to send to logstash indexer")
+  }
+  if $field == undef {
+    $lumberjack_tag_fields = 'lumberjack_host'
+  } else {
+    $lumberjack_tag_fields = $lj_fields
+  }
+
   case $::operatingsystem {
     'RedHat', 'CentOS': {
       $pkg_provider = 'rpm'
@@ -11,12 +33,12 @@ class logstash::lumberjack(
       $tmpsource = "/tmp/${package_name}"
       $initfile = template("${module_name}/etc/lumberjack/init.d/lumberjack.init.RedHat.erb")
       $defaults_file_path = '/etc/sysconfig/lumberjack'
-      $defaults_file = template("${module_name}/etc/lumberjack/defaults/lumberjack/defaults.RedHat.erb")
       if ! $logfiles {
         $logfiles_path = [ '/var/log/messages', '/var/log/secure' ]
       } else {
         $logfiles_path = $logfiles
       }
+      $defaults_file = template("${module_name}/etc/lumberjack/defaults/lumberjack.defaults.RedHat.erb")
     }
     'Debian', 'Ubuntu': {
       $pkg_provider = 'dpkg'
@@ -24,13 +46,12 @@ class logstash::lumberjack(
       $tmpsource = "/tmp/${package_name}"
       $initfile = template("${module_name}/etc/lumberjack/init.d/lumberjack.init.Debian.erb")
       $defaults_file_path = '/etc/default/lumberjack'
-      $defaults_file = template("${module_name}/etc/lumberjack/defaults/lumberjack/defaults.Debian.erb")
       if ! $logfiles {
         $logfiles_path = [ '/var/log/syslog', '/var/log/dmesg' ]
       } else {
         $logfiles_path = $logfiles
       }
-
+      $defaults_file = template("${module_name}/etc/lumberjack/defaults/lumberjack.defaults.Debian.erb")
     }
     default: {
       fail("${module_name} provides no package for ${::operatingsystem}")
